@@ -23,7 +23,7 @@ import bpy
 import sys
 import subprocess  # use Python executable (for pip usage)
 from pathlib import Path  # Object-oriented filesystem paths since Python 3.4
-
+import array
 
 # class StartZMQSub(bpy.types.Operator):
 class SOCKET_OT_connect_subscriber(bpy.types.Operator):
@@ -113,21 +113,21 @@ class SOCKET_OT_connect_subscriber(bpy.types.Operator):
             sockets = dict(self.poller.poll(0))
             recieved = False
             # check if our sub socket has a message
-            topic, msg = 0, 0
+            msg = 0
             receiv_last = True
             is_recv = 0
             while (receiv_last):
                 try:
-                    topic, msg = socket_sub.recv_multipart(flags=zmq.NOBLOCK)
-                    #topic, msg = topic1, msg1
+                    msg = socket_sub.recv(flags=zmq.NOBLOCK)
                     is_recv = 1
                 except Exception as e:
                     receiv_last = False
 
             if is_recv:
-                print("On topic {}, received data: {}".format(topic, msg))
+                msg = array.array('d', msg) #now msg is a double sequence
+                print("received data: {}".format(msg))
                 # context stays the same as when started?
-                self.socket_settings.msg_received = msg.decode('utf-8')
+                self.socket_settings.msg_received = msg
 
                 # update selected obj only if property `dynamic_object` is on (blendzmq_props.py)
                 if self.socket_settings.dynamic_object:
@@ -137,7 +137,7 @@ class SOCKET_OT_connect_subscriber(bpy.types.Operator):
                     self.selected_objs = bpy.context.scene.view_layers[0].objects.selected.items().copy()
 
                 # get our x location value
-                move_val = int(msg.decode('utf-8')) * .1
+                move_val = msg[0] * .1
 
                 # if we only wanted to update the active object with `.objects.active`
                 # self.selected_obj.location.x = move_val
