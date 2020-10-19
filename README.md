@@ -1,3 +1,15 @@
+Этот аддон был взят по ссылкам и описанию ниже. 
+Исправлен таким образом, что
+примерно следующий код полученное сообщение применяет к ригу
+
+pose = bpy.data.objects['armature_mm'].pose
+pose.bones['карета'].location.y = msg[0]/1000.0 
+pose.bones['башня'].rotation_euler.y = radians(msg[1])
+pose.bones['пантограф'].location.y = msg[2]/1000.0
+pose.bones['каретка связи'].location.y = msg[3]/1000.0
+pose.bones['кисть связи'].rotation_euler.z = radians(msg[4])
+pose.bones['поворот связи'].rotation_euler.z = radians(msg[5])
+
 # Blender-ZMQ-add-on (BlendZMQ)
 Blender 2.8x add-on that allows streaming of data (from another computer) into Blender over ZeroMQ sockets,
 **without** freezing the interface (publisher-subscriber pattern).
