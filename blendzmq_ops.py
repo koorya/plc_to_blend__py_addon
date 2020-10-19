@@ -129,28 +129,37 @@ class SOCKET_OT_connect_subscriber(bpy.types.Operator):
                 msg = array.array('d', msg) #now msg is a double sequence
                 print("received data: {}".format(msg))
                 # context stays the same as when started?
-                self.socket_settings.msg_received = "{}".format(msg)
+     #           self.socket_settings.msg_received = "{}".format(msg)
 
                 # update selected obj only if property `dynamic_object` is on (blendzmq_props.py)
-                if self.socket_settings.dynamic_object:
+     #           if self.socket_settings.dynamic_object:
                     # only active object (no need for a copy)
                     # self.selected_obj = bpy.context.scene.view_layers[0].objects.active
                     # collections work with pointers and doesn't keep the old reference, therefore we need a copy
-                    self.selected_objs = bpy.context.scene.view_layers[0].objects.selected.items().copy()
+      #              self.selected_objs = bpy.context.scene.view_layers[0].objects.selected.items().copy()
 
-                # get our x location value
-                move_val = msg[0] * .1
 
                 # if we only wanted to update the active object with `.objects.active`
                 # self.selected_obj.location.x = move_val
                 # move all (previously) selected objects' x coordinate to move_val
                 # for obj in self.selected_objs:
                 #     obj[1].location.x = move_val
+                pose = bpy.data.objects['armature_mm'].pose
 
-                bpy.data.objects['armature_mm'].pose.bones['карета'].location.y = msg[0]/1000.0
-                bpy.data.objects['armature_mm'].pose.bones['пантограф'].location.y = msg[1]/1000.0
-                bpy.data.objects['armature_mm'].pose.bones['каретка связи'].location.y = msg[2]/1000.0
-                bpy.data.objects['armature_mm'].pose.bones['башня'].rotation_euler.y = radians(msg[3])
+                if abs(pose.bones['карета'].location.y - msg[0]/1000.0) > 0.00001:
+                    pose.bones['карета'].location.y = msg[0]/1000.0 
+                if abs(pose.bones['башня'].rotation_euler.y - radians(msg[1])) > 0.000001:
+                    pose.bones['башня'].rotation_euler.y = radians(msg[1])
+                if abs(pose.bones['пантограф'].location.y - msg[2]/1000.0) > 0.00001:
+                    pose.bones['пантограф'].location.y = msg[2]/1000.0
+                if abs(pose.bones['каретка связи'].location.y - msg[3]/1000.0) > 0.00001:
+                    pose.bones['каретка связи'].location.y = msg[3]/1000.0
+                if abs(pose.bones['кисть связи'].rotation_euler.z - radians(msg[4])) > 0.000001:
+                    pose.bones['кисть связи'].rotation_euler.z = radians(msg[4])
+                if abs(pose.bones['поворот связи'].rotation_euler.z - radians(msg[5])) > 0.000001:
+                    pose.bones['поворот связи'].rotation_euler.z = radians(msg[5])
+
+
 
             # keep running and check every 0.1 millisecond for new ZeroMQ messages
             return 0.001
